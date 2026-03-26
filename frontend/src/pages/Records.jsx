@@ -1,46 +1,97 @@
 import { useNavigate } from "react-router-dom"
+import { useState } from "react"
 import { useRecords } from "../context/RecordsContext"
 import StatusBadge from "../components/StatusBadge"
 import * as api from "../services/api"
 
 export default function Records() {
-    const { documents } = useRecords()
+    const { documents, fetchDocuments } = useRecords()
     const navigate = useNavigate()
+    const [form, setForm] = useState({ id: "", name: "", department: "", content: "" })
+    const [createError, setCreateError] = useState("")
+    const [isCreating, setIsCreating] = useState(false)
 
     const activeCount = documents.filter(d => d.status === "active").length
     const compromisedCount = documents.filter(d => d.status === "compromised").length
     const recoveryCount = documents.filter(d => d.status === "recovery").length
 
+    const handleCreateRecord = async () => {
+        const id = form.id.trim()
+        const name = form.name.trim()
+        const department = form.department.trim()
+        const content = form.content.trim()
+
+        if (!id || !name || !department || !content) {
+            setCreateError("Please fill id, name, department, and content.")
+            return
+        }
+
+        try {
+            setIsCreating(true)
+            setCreateError("")
+
+            const created = await api.createDocument({ id, name, department })
+            if (created?.error) {
+                setCreateError(created.error)
+                return
+            }
+
+            const uploaded = await api.uploadDocument(id, content)
+            if (uploaded?.error) {
+                setCreateError(uploaded.error)
+                return
+            }
+
+            setForm({ id: "", name: "", department: "", content: "" })
+            await fetchDocuments()
+        } catch (error) {
+            setCreateError("Failed to create record.")
+        } finally {
+            setIsCreating(false)
+        }
+    }
+
     return (
-        <div className="p-8">
-            {/* Header */}
-            {/* <div className="mb-8">
-                <h2 className="text-3xl font-bold text-slate-900">Records Dashboard</h2>
-                <p className="text-slate-600">Municipal document registry — {documents.length} records on file</p>
-            </div> */}
-            <div className="flex justify-between items-center mb-8">
-  
-<div className="mb-8">
-                <h2 className="text-3xl font-bold text-slate-900">Records Dashboard</h2>
-                <p className="text-slate-600">Municipal document registry — {documents.length} records on file</p>
+        <div>
+            <div className="mb-8">
+                <h2 className="section-header">Records Dashboard</h2>
+                <p className="section-subtitle">Municipal document registry - {documents.length} records on file</p>
             </div>
-  <button
-    onClick={async () => {
-      const doc = {
-        id: "doc" + Math.floor(Math.random() * 1000),
-        name: "Demo Document",
-        department: "IT"
-      }
 
-                        await api.seedDocuments([doc])
-                        await api.uploadDocument(doc.id, "This is demo content for judges.")
-
-                        window.location.reload()
-                    }}
-                    className="primary-btn"
-                >
-                    + Add Demo Document
-                </button>
+            <div className="section-card mb-8 p-6">
+                <h3 className="mb-4 text-lg font-semibold text-slate-900">Add Record</h3>
+                <div className="grid gap-3 md:grid-cols-3">
+                    <input
+                        value={form.id}
+                        onChange={(e) => setForm(prev => ({ ...prev, id: e.target.value }))}
+                        placeholder="Record ID"
+                        className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                    />
+                    <input
+                        value={form.name}
+                        onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Document Name"
+                        className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                    />
+                    <input
+                        value={form.department}
+                        onChange={(e) => setForm(prev => ({ ...prev, department: e.target.value }))}
+                        placeholder="Department"
+                        className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                    />
+                </div>
+                <textarea
+                    value={form.content}
+                    onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
+                    placeholder="Document content"
+                    className="mt-3 h-28 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500"
+                />
+                <div className="mt-3 flex items-center gap-3">
+                    <button onClick={handleCreateRecord} className="primary-btn" disabled={isCreating}>
+                        {isCreating ? "Adding..." : "Add Record"}
+                    </button>
+                    {createError && <span className="text-sm text-red-600">{createError}</span>}
+                </div>
             </div>
 
             {/* Stats */}
@@ -70,8 +121,8 @@ export default function Records() {
 
                     <tbody>
                         {documents.map(doc => (
-                            <tr key={doc.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                                <td className="px-6 py-3 font-medium text-slate-900 flex items-center gap-2">
+                            <tr key={doc.id}>
+                                <td className="font-medium text-slate-900 flex items-center gap-2">
                                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 8V6a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H8a2 2 0 01-2-2v-2" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 12h6" /></svg>
                                     {doc.name}
                                 </td>

@@ -107,6 +107,30 @@ def get_documents():
     return jsonify(list(documents.values()))
 
 
+@app.route("/documents", methods=["POST"])
+def create_document():
+    data = request.json or {}
+    doc_id = (data.get("id") or "").strip()
+    name = (data.get("name") or "").strip()
+    department = (data.get("department") or "").strip()
+
+    if not doc_id or not name or not department:
+        return jsonify({"error": "id, name and department are required"}), 400
+
+    if doc_id in documents:
+        return jsonify({"error": "Document id already exists"}), 409
+
+    documents[doc_id] = {
+        "id": doc_id,
+        "name": name,
+        "department": department,
+        "status": "active",
+        "lastModified": datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+
+    return jsonify(documents[doc_id]), 201
+
+
 @app.route("/upload/<doc_id>", methods=["POST"])
 def upload_document(doc_id):
     if doc_id not in documents:
