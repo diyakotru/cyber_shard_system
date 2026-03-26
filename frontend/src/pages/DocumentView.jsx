@@ -61,35 +61,35 @@ export default function DocumentView() {
   }
 
   if (!doc) {
-    return <div className="p-8">Document not found</div>
+    return <div className="status-msg error">Document not found</div>
   }
 
   const isCompromised = status === "compromised"
 
   return (
-    <div className="p-8">
+    <div>
 
       <button
         onClick={() => navigate("/")}
-        className="mb-6 text-slate-600 hover:text-slate-900"
+        className="secondary-btn mb-6"
       >
         ← Back to Records
       </button>
 
-      <h1 className="text-2xl font-semibold mb-2">{doc.name}</h1>
-      <p className="text-sm text-slate-500 mb-6">
+      <h1 className="section-header mb-2 !text-2xl">{doc.name}</h1>
+      <p className="section-subtitle mb-6 text-sm">
         {doc.department} • Last modified: {doc.lastModified}
       </p>
 
-      <div className="bg-white border rounded-lg">
+      <div className="section-card overflow-hidden">
 
-        <div className="flex justify-between px-6 py-4 border-b bg-gray-50">
+        <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
           <h2 className="font-semibold">DOCUMENT CONTENT</h2>
 
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-4 py-2 text-sm border rounded"
+            className="primary-btn !py-2 !text-sm disabled:opacity-60"
           >
             {isSaving ? "Saving..." : "Save Changes"}
           </button>
@@ -99,7 +99,7 @@ export default function DocumentView() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full h-96 border p-4 font-mono text-sm"
+            className="h-96 w-full rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-sm outline-none focus:border-blue-500 focus:bg-white"
           />
         </div>
 
@@ -108,7 +108,7 @@ export default function DocumentView() {
       <div className={`mt-6 p-4 rounded border ${
         isCompromised
           ? "bg-red-50 border-red-200"
-          : "bg-green-50 border-green-200"
+          : "bg-emerald-50 border-emerald-200"
       }`}>
         <h3 className="font-semibold mb-2">Integrity Status</h3>
         <p className="text-sm">
@@ -121,7 +121,7 @@ export default function DocumentView() {
           <button
             onClick={handleRestore}
             disabled={isRestoring}
-            className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded"
+            className="mt-3 primary-btn !bg-amber-500 hover:!bg-amber-600 disabled:opacity-60"
           >
             {isRestoring ? "Recovering..." : "Initiate Recovery"}
           </button>
@@ -129,7 +129,7 @@ export default function DocumentView() {
       </div>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
+        <div className="status-msg error mt-4">
           {error}
         </div>
       )}

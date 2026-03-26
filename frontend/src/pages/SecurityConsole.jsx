@@ -30,19 +30,19 @@ export default function SecurityConsole() {
   }
 
   return (
-    <div className="p-8">
+    <div>
 
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-900">
+        <h2 className="section-header">
           Security Console
         </h2>
-        <p className="text-slate-600">
+        <p className="section-subtitle">
           Integrity monitoring and distributed recovery operations
         </p>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+      <div className="section-card overflow-hidden">
+        <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
           <h2 className="text-sm font-medium text-slate-700">
             Compromised Documents ({compromisedDocs.length})
           </h2>
@@ -61,26 +61,27 @@ export default function SecurityConsole() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-6 py-3">Document</th>
-                <th className="text-left px-6 py-3">Department</th>
-                <th className="text-left px-6 py-3">Last Modified</th>
-                <th className="text-right px-6 py-3">Action</th>
+              <tr>
+                <th>Document</th>
+                <th>Department</th>
+                <th>Last Modified</th>
+                <th className="text-right">Action</th>
               </tr>
             </thead>
             <tbody>
               {compromisedDocs.map(doc => (
-                <tr key={doc.id} className="border-b border-gray-100">
-                  <td className="px-6 py-4">{doc.name}</td>
-                  <td className="px-6 py-4 text-slate-500">{doc.department}</td>
-                  <td className="px-6 py-4 text-slate-500">{doc.lastModified}</td>
-                  <td className="px-6 py-4 text-right">
+                <tr key={doc.id}>
+                  <td>{doc.name}</td>
+                  <td className="text-slate-500">{doc.department}</td>
+                  <td className="text-slate-500">{doc.lastModified}</td>
+                  <td className="text-right">
                     <button
                       onClick={() => handleRecovery(doc.id)}
                       disabled={recovering === doc.id}
-                      className="px-3 py-1 text-xs border rounded"
+                      className="primary-btn !px-3 !py-1.5 !text-xs disabled:opacity-60"
                     >
                       {recovering === doc.id
                         ? "Recovering..."
@@ -91,11 +92,12 @@ export default function SecurityConsole() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
       {error && (
-        <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded">
+        <div className="status-msg error mt-6">
           {error}
         </div>
       )}

@@ -6,92 +6,86 @@ import * as api from "../services/api"
 export default function Records() {
     const { documents } = useRecords()
     const navigate = useNavigate()
-    const visibleDocs = documents.filter(d => d.status !== "compromised")
 
     const activeCount = documents.filter(d => d.status === "active").length
     const compromisedCount = documents.filter(d => d.status === "compromised").length
     const recoveryCount = documents.filter(d => d.status === "recovery").length
 
     return (
-        <div className="p-8">
-            {/* Header */}
-            {/* <div className="mb-8">
-                <h2 className="text-3xl font-bold text-slate-900">Records Dashboard</h2>
-                <p className="text-slate-600">Municipal document registry — {documents.length} records on file</p>
-            </div> */}
-            <div className="flex justify-between items-center mb-8">
-  
-<div className="mb-8">
-                <h2 className="text-3xl font-bold text-slate-900">Records Dashboard</h2>
-                <p className="text-slate-600">Municipal document registry — {documents.length} records on file</p>
+        <div>
+            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 className="section-header">Property Records Query</h2>
+                    <p className="section-subtitle">Municipal document registry - {documents.length} records on file</p>
+                </div>
+                <button
+                    onClick={async () => {
+                        const doc = {
+                            id: "doc" + Math.floor(Math.random() * 1000),
+                            name: "Demo Document",
+                            department: "IT"
+                        }
+
+                        await api.seedDocuments([doc])
+                        await api.uploadDocument(doc.id, "This is demo content for judges.")
+
+                        window.location.reload()
+                    }}
+                    className="primary-btn"
+                >
+                    + Add Demo Document
+                </button>
             </div>
-  <button
-    onClick={async () => {
-      const doc = {
-        id: "doc" + Math.floor(Math.random() * 1000),
-        name: "Demo Document",
-        department: "IT"
-      }
-
-      await api.seedDocuments([doc])
-      await api.uploadDocument(doc.id, "This is demo content for judges.")
-
-      window.location.reload()
-    }}
-    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-  >
-    + Add Demo Document
-  </button>
-</div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="mb-8 grid gap-4 md:grid-cols-3">
                 <StatCard title="Active Records" value={activeCount} color="text-green-600" />
                 <StatCard title="Integrity Alerts" value={compromisedCount} color="text-red-600" />
                 <StatCard title="Under Recovery" value={recoveryCount} color="text-yellow-600" />
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg border border-gray-200">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div className="section-card overflow-hidden">
+                <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
                     <h2 className="font-semibold text-slate-900">Official Documents</h2>
                 </div>
 
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                <table className="data-table">
                     <thead>
-                        <tr className="border-b border-gray-200 bg-gray-50">
-                            <th className="text-left px-6 py-3 font-semibold text-slate-900">Document Name</th>
-                            <th className="text-left px-6 py-3 font-semibold text-slate-900">Department</th>
-                            <th className="text-left px-6 py-3 font-semibold text-slate-900">Status</th>
-                            <th className="text-left px-6 py-3 font-semibold text-slate-900">Last Modified</th>
-                            <th className="text-left px-6 py-3 font-semibold text-slate-900">Actions</th>
+                        <tr>
+                            <th>Document Name</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Last Modified</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {documents.map(doc => (
-                            <tr key={doc.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                                <td className="px-6 py-3 font-medium text-slate-900 flex items-center gap-2">
+                            <tr key={doc.id}>
+                                <td className="font-medium text-slate-900 flex items-center gap-2">
                                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 8V6a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H8a2 2 0 01-2-2v-2" /><path strokeLinecap="round" strokeLinejoin="round" d="M6 12h6" /></svg>
                                     {doc.name}
                                 </td>
 
-                                <td className="px-6 py-3 text-slate-600">
+                                <td className="text-slate-600">
                                     {doc.department}
                                 </td>
 
-                                <td className="px-6 py-3">
+                                <td>
                                     <StatusBadge status={doc.status} />
                                 </td>
 
-                                <td className="px-6 py-3 text-slate-600">
+                                <td className="text-slate-600">
                                     {doc.lastModified}
                                 </td>
 
-                                <td className="px-6 py-3">
+                                <td className="whitespace-nowrap">
                                     <button
                                         onClick={() => navigate(`/document/${doc.id}`)}
-                                        className="inline-flex items-center gap-2 px-3 py-1 text-xs bg-gray-100 text-slate-700 border border-gray-200 hover:bg-gray-200 transition"
+                                        className="secondary-btn mr-2 !px-3 !py-1.5 !text-xs"
                                     >
                                         <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -99,19 +93,20 @@ export default function Records() {
                                         Open
                                     </button>
                                     <button
-  onClick={async () => {
-    await api.deleteDocument(doc.id)
-    window.location.reload()
-  }}
-  className="ml-2 px-3 py-1 text-xs bg-red-100 text-red-600 border border-red-200 hover:bg-red-200"
->
-  Delete
-</button>
+                                        onClick={async () => {
+                                            await api.deleteDocument(doc.id)
+                                            window.location.reload()
+                                        }}
+                                        className="danger-btn !px-3 !py-1.5 !text-xs"
+                                    >
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     )
@@ -119,7 +114,7 @@ export default function Records() {
 
 function StatCard({ title, value, color }) {
     return (
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="section-card p-6">
             <div className={`text-3xl font-semibold ${color} mb-1`}>
                 {value}
             </div>
