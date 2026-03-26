@@ -102,13 +102,11 @@ def seed_documents():
     return jsonify({"message": "Seeded"})
 
 
-@app.route("/documents", methods=["GET"])
-def get_documents():
-    return jsonify(list(documents.values()))
+@app.route("/documents", methods=["GET", "POST"])
+def documents_route():
+    if request.method == "GET":
+        return jsonify(list(documents.values()))
 
-
-@app.route("/documents", methods=["POST"])
-def create_document():
     data = request.json or {}
     doc_id = (data.get("id") or "").strip()
     name = (data.get("name") or "").strip()

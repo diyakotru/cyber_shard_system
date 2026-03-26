@@ -12,7 +12,28 @@ export async function createDocument(payload) {
     body: JSON.stringify(payload),
   })
 
-  return res.json()
+  if (res.ok) {
+    return res.json()
+  }
+
+  // Backward compatibility: some running backend instances still expose only /seed for creation.
+  if (res.status === 404 || res.status === 405) {
+    const fallback = await fetch(`${BASE_URL}/seed`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([payload]),
+    })
+
+    if (!fallback.ok) {
+      const fallbackErr = await fallback.json().catch(() => ({}))
+      return { error: fallbackErr.error || "Unable to create document" }
+    }
+
+    return { id: payload.id, name: payload.name, department: payload.department }
+  }
+
+  const err = await res.json().catch(() => ({}))
+  return { error: err.error || "Unable to create document" }
 }
 
 export async function recoverDocument(id) {
